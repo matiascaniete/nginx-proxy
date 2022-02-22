@@ -47,37 +47,37 @@ services:
         max-size: ${NGINX_WEB_LOG_MAX_SIZE:-4m}
         max-file: ${NGINX_WEB_LOG_MAX_FILE:-10}
 
-#   netdata:
-#     image: netdata/netdata
-#     container_name: netdata
-#     hostname: netdata
-#     expose:
-#       - 19999
-#     environment:
-#       VIRTUAL_HOST: ${NETDATA_HOST}
-#       VIRTUAL_PORT: 19999
-#       LETSENCRYPT_HOST: ${NETDATA_HOST}
-#       LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
-#       HTTPS_METHOD: ${HTTPS_METHOD}
-#     restart: unless-stopped
-#     cap_add:
-#       - SYS_PTRACE
-#     security_opt:
-#       - apparmor:unconfined
-#     volumes:
-#       - netdataconfig:/etc/netdata
-#       - netdatalib:/var/lib/netdata
-#       - netdatacache:/var/cache/netdata
-#       - /etc/passwd:/host/etc/passwd:ro
-#       - /etc/group:/host/etc/group:ro
-#       - /proc:/host/proc:ro
-#       - /sys:/host/sys:ro
-#       - /etc/os-release:/host/etc/os-release:ro
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    hostname: netdata
+    expose:
+      - 19999
+    environment:
+      VIRTUAL_HOST: ${NETDATA_HOST}
+      VIRTUAL_PORT: 19999
+      LETSENCRYPT_HOST: ${NETDATA_HOST}
+      LETSENCRYPT_TEST: ${NETDATA_LETSENCRYPT_TEST:-0}
+      HTTPS_METHOD: ${NETDATA_HTTPS_METHOD:-redirect}
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
 
-# volumes:
-#   netdataconfig:
-#   netdatalib:
-#   netdatacache:
+volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
 
 networks:
   default:
