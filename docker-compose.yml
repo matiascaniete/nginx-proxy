@@ -6,8 +6,10 @@ services:
     container_name: nginx-proxy
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "${IPv4:-0.0.0.0}:${DOCKER_HTTP_:-80}:80"
+      - "${IPv4:-0.0.0.0}:${DOCKER_HTTPS:-443}:443"
+#      - "${IPv6:-::0}:${DOCKER_HTTP_:-80}:80"
+#      - "${IPv6:-::0}:${DOCKER_HTTPS:-443}:443"
     environment:
       DEFAULT_HOST: ${DEFAULT_HOST}
     volumes:
