@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+docker exec nginx-letsencrypt /app/cert_status
+# docker exec letsencrypt /app/force_renew

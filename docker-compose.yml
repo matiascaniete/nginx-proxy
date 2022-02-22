@@ -1,0 +1,83 @@
+version: '3.5'
+
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:0.10
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DEFAULT_HOST: ${DEFAULT_HOST}
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./docker/nginx-proxy/vhost.d/default_location:/etc/nginx/vhost.d/default_location
+      - ./data/nginx/htpasswd:/etc/nginx/htpasswd
+      - ./data/nginx/certs:/etc/nginx/certs
+      - ./data/nginx/vhostd:/etc/nginx/vhost.d
+      - ./data/nginx/confd:/etc/nginx/conf.d
+      - ./data/nginx/html:/usr/share/nginx/html
+    logging:
+      driver: ${NGINX_WEB_LOG_DRIVER:-json-file}
+      options:
+        max-size: ${NGINX_WEB_LOG_MAX_SIZE:-4m}
+        max-file: ${NGINX_WEB_LOG_MAX_FILE:-10}
+
+  nginx-letsencrypt:
+    image: nginxproxy/acme-companion:2.1.3
+    container_name: nginx-letsencrypt
+    restart: always
+    environment:
+      NGINX_PROXY_CONTAINER: nginx-proxy
+      DEFAULT_EMAIL: ${LETSENCRYPT_DEFAULT_EMAIL}
+      DEBUG: ${LETSENCRYPT_DEBUG:-0}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/nginx/certs:/etc/nginx/certs:rw
+      - ./data/nginx/vhostd:/etc/nginx/vhost.d
+      - ./data/nginx/confd:/etc/nginx/conf.d
+      - ./data/nginx/html:/usr/share/nginx/html
+      - ./data/acme:/etc/acme.sh
+    logging:
+      driver: ${NGINX_WEB_LOG_DRIVER:-json-file}
+      options:
+        max-size: ${NGINX_WEB_LOG_MAX_SIZE:-4m}
+        max-file: ${NGINX_WEB_LOG_MAX_FILE:-10}
+
+#   netdata:
+#     image: netdata/netdata
+#     container_name: netdata
+#     hostname: netdata
+#     expose:
+#       - 19999
+#     environment:
+#       VIRTUAL_HOST: ${NETDATA_HOST}
+#       VIRTUAL_PORT: 19999
+#       LETSENCRYPT_HOST: ${NETDATA_HOST}
+#       LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
+#       HTTPS_METHOD: ${HTTPS_METHOD}
+#     restart: unless-stopped
+#     cap_add:
+#       - SYS_PTRACE
+#     security_opt:
+#       - apparmor:unconfined
+#     volumes:
+#       - netdataconfig:/etc/netdata
+#       - netdatalib:/var/lib/netdata
+#       - netdatacache:/var/cache/netdata
+#       - /etc/passwd:/host/etc/passwd:ro
+#       - /etc/group:/host/etc/group:ro
+#       - /proc:/host/proc:ro
+#       - /sys:/host/sys:ro
+#       - /etc/os-release:/host/etc/os-release:ro
+
+# volumes:
+#   netdataconfig:
+#   netdatalib:
+#   netdatacache:
+
+networks:
+  default:
+    external: true
+    name: ${NETWORK:-proxy}

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+if [ ! $1 ]; then
+    echo "Domain missing"
+    exit 1
+fi
+
+DOMAIN_NAME=$1
+
+CERTS_PATH="$(pwd)/data/nginx/certs"
+
+sudo rm "$CERTS_PATH/$DOMAIN_NAME.crt"
+sudo rm "$CERTS_PATH/$DOMAIN_NAME.key"
+
+mkcert "$DOMAIN_NAME"
+
+sudo mv "$DOMAIN_NAME.pem" "$CERTS_PATH/$DOMAIN_NAME.crt"
+sudo mv "$DOMAIN_NAME-key.pem" "$CERTS_PATH/$DOMAIN_NAME.key"
+
+docker-compose restart
